@@ -157,11 +157,12 @@ export default function Home() {
       <SurpriseEffects snowOn={snowOn} santaOn={santaOn} />
       <div className="mx-auto flex max-w-5xl flex-col gap-8 px-5 py-10 lg:flex-row lg:py-14">
         <header className="flex w-full items-center justify-between gap-4">
-          <div className="space-y-4 w-full md:max-w-md lg:max-w-lg">
+          <div className="space-y-2 w-full md:max-w-md lg:max-w-lg">
             <p className="text-sm uppercase tracking-[0.2em] text-emerald-200">
-              SF CoE XMAS KUDOS Tree
+              XMAS KUDOS Tree
             </p>
-            <h1 className="text-3xl font-semibold leading-tight text-white">
+            <p className="text-xs text-emerald-100/80">By the SF CoE Consulting Team</p>
+            <h1 className="text-2xl font-semibold leading-tight text-white md:text-3xl">
               Share gratitude as glowing ornaments
             </h1>
           </div>
