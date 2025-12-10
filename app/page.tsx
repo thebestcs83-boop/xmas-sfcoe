@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import { SurpriseEffects } from "@/components/SurpriseEffects";
 import { supabase } from "@/lib/supabaseClient";
 
 type Kudos = {
@@ -54,7 +55,9 @@ export default function Home() {
   const [kudos, setKudos] = useState<Kudos[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [surpriseMode, setSurpriseMode] = useState(false);
+  const [snowOn, setSnowOn] = useState(false);
+  const [santaOn, setSantaOn] = useState(false);
+  const [selectedKudos, setSelectedKudos] = useState<Kudos | null>(null);
 
   const [author, setAuthor] = useState("");
   const [toName, setToName] = useState("");
@@ -106,18 +109,6 @@ export default function Home() {
     };
   }, []);
 
-  const snowflakes = useMemo(
-    () =>
-      Array.from({ length: 30 }).map((_, idx) => ({
-        id: idx,
-        left: Math.random() * 100,
-        duration: 8 + Math.random() * 8,
-        delay: Math.random() * 5,
-        size: 6 + Math.random() * 6,
-      })),
-    [],
-  );
-
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setError(null);
@@ -165,6 +156,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-emerald-950 to-slate-950 text-white">
+      <SurpriseEffects snowOn={snowOn} santaOn={santaOn} />
       <div className="mx-auto flex max-w-5xl flex-col gap-8 px-5 py-10 lg:flex-row lg:py-14">
         <header className="flex w-full items-center justify-between gap-4">
           <div>
@@ -178,39 +170,36 @@ export default function Home() {
               Powered by Supabase — live and anonymous.
             </p>
           </div>
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-emerald-100/80">Surprise Mode</span>
-            <button
-              type="button"
-              onClick={() => setSurpriseMode((prev) => !prev)}
-              className={`flex h-9 w-16 items-center rounded-full border border-emerald-300/40 bg-white/10 px-1 transition ${
-                surpriseMode ? "justify-end bg-emerald-400/40" : "justify-start"
-              }`}
-            >
-              <span className="h-7 w-7 rounded-full bg-white shadow-md transition" />
-            </button>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-emerald-100/80">Snow</span>
+              <button
+                type="button"
+                onClick={() => setSnowOn((prev) => !prev)}
+                className={`flex h-9 w-16 items-center rounded-full border border-emerald-300/40 bg-white/10 px-1 transition ${
+                  snowOn ? "justify-end bg-emerald-400/40" : "justify-start"
+                }`}
+              >
+                <span className="h-7 w-7 rounded-full bg-white shadow-md transition" />
+              </button>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-emerald-100/80">Santa</span>
+              <button
+                type="button"
+                onClick={() => setSantaOn((prev) => !prev)}
+                className={`flex h-9 w-16 items-center rounded-full border border-emerald-300/40 bg-white/10 px-1 transition ${
+                  santaOn ? "justify-end bg-emerald-400/40" : "justify-start"
+                }`}
+              >
+                <span className="h-7 w-7 rounded-full bg-white shadow-md transition" />
+              </button>
+            </div>
           </div>
         </header>
 
         <main className="grid w-full grid-cols-1 gap-8 lg:grid-cols-[1.2fr_1fr]">
           <section className="relative overflow-hidden rounded-3xl border border-emerald-300/20 bg-gradient-to-b from-emerald-900/60 via-emerald-950 to-emerald-950 p-6 shadow-2xl">
-            {surpriseMode && (
-              <div className="pointer-events-none absolute inset-0 overflow-hidden">
-                {snowflakes.map((flake) => (
-                  <span
-                    key={flake.id}
-                    className="snowflake"
-                    style={{
-                      left: `${flake.left}%`,
-                      width: flake.size,
-                      height: flake.size,
-                      animationDuration: `${flake.duration}s`,
-                      animationDelay: `${flake.delay}s`,
-                    }}
-                  />
-                ))}
-              </div>
-            )}
             <div className="relative mx-auto aspect-[3/4] max-h-[640px] w-full max-w-[520px]">
               <div
                 className="absolute inset-0 rounded-b-[28px] shadow-[0_30px_80px_-10px_rgba(0,0,0,0.55)]"
@@ -226,9 +215,36 @@ export default function Home() {
               />
               <div className="absolute inset-0">
                 {kudos.slice(0, 50).map((item) => (
-                  <Ornament key={item.id} kudos={item} twinkle={surpriseMode} />
+                  <Ornament
+                    key={item.id}
+                    kudos={item}
+                    twinkle={snowOn}
+                    onSelect={setSelectedKudos}
+                  />
                 ))}
               </div>
+            </div>
+            <div className="mt-4 rounded-2xl border border-emerald-200/20 bg-slate-900/70 p-4 shadow-lg md:hidden">
+              {selectedKudos ? (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">{selectedKudos.emoji}</span>
+                    <p className="text-base font-semibold text-white">
+                      To {selectedKudos.to_name}
+                    </p>
+                  </div>
+                  <p className="text-sm leading-relaxed text-emerald-50/90">
+                    {selectedKudos.message}
+                  </p>
+                  <p className="text-xs text-emerald-200/80">
+                    From {selectedKudos.author || "Anonymous"}
+                  </p>
+                </div>
+              ) : (
+                <p className="text-sm text-emerald-100/80">
+                  Tap an ornament on the tree to see its message.
+                </p>
+              )}
             </div>
           </section>
 
@@ -405,15 +421,17 @@ export default function Home() {
 type OrnamentProps = {
   kudos: Kudos;
   twinkle: boolean;
+  onSelect?: (kudos: Kudos) => void;
 };
 
-function Ornament({ kudos, twinkle }: OrnamentProps) {
+function Ornament({ kudos, twinkle, onSelect }: OrnamentProps) {
   const left = clamp(kudos.x, 0, 1) * 100;
   const top = clamp(kudos.y, 0, 1) * 100;
 
   return (
     <div
-      className="group absolute -translate-x-1/2 -translate-y-1/2"
+      className="group absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer"
+      onClick={() => onSelect?.(kudos)}
       style={{ left: `${left}%`, top: `${top}%` }}
     >
       <div
