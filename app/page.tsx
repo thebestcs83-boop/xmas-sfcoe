@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { ChristmasTree } from "@/components/ChristmasTree";
 import { SurpriseEffects } from "@/components/SurpriseEffects";
 import { supabase } from "@/lib/supabaseClient";
 
@@ -18,9 +19,6 @@ type Kudos = {
 
 const festiveColors = ["#e11d48", "#22c55e", "#fbbf24", "#38bdf8", "#f97316"];
 const emojiOptions = ["🎄", "🎁", "⭐", "❄️", "❤️", "🔔"];
-
-const clamp = (value: number, min: number, max: number) =>
-  Math.min(Math.max(value, min), max);
 
 const randomBetween = (min: number, max: number) =>
   Math.random() * (max - min) + min;
@@ -159,94 +157,26 @@ export default function Home() {
       <SurpriseEffects snowOn={snowOn} santaOn={santaOn} />
       <div className="mx-auto flex max-w-5xl flex-col gap-8 px-5 py-10 lg:flex-row lg:py-14">
         <header className="flex w-full items-center justify-between gap-4">
-          <div>
+          <div className="space-y-4 w-full md:max-w-md lg:max-w-lg">
             <p className="text-sm uppercase tracking-[0.2em] text-emerald-200">
-              Christmas Kudos Tree
+              SF CoE XMAS KUDOS Tree
             </p>
             <h1 className="text-3xl font-semibold leading-tight text-white">
               Share gratitude as glowing ornaments
             </h1>
-            <p className="text-sm text-emerald-100/80">
-              Powered by Supabase — live and anonymous.
-            </p>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-emerald-100/80">Snow</span>
-              <button
-                type="button"
-                onClick={() => setSnowOn((prev) => !prev)}
-                className={`flex h-9 w-16 items-center rounded-full border border-emerald-300/40 bg-white/10 px-1 transition ${
-                  snowOn ? "justify-end bg-emerald-400/40" : "justify-start"
-                }`}
-              >
-                <span className="h-7 w-7 rounded-full bg-white shadow-md transition" />
-              </button>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-emerald-100/80">Santa</span>
-              <button
-                type="button"
-                onClick={() => setSantaOn((prev) => !prev)}
-                className={`flex h-9 w-16 items-center rounded-full border border-emerald-300/40 bg-white/10 px-1 transition ${
-                  santaOn ? "justify-end bg-emerald-400/40" : "justify-start"
-                }`}
-              >
-                <span className="h-7 w-7 rounded-full bg-white shadow-md transition" />
-              </button>
-            </div>
           </div>
         </header>
 
         <main className="grid w-full grid-cols-1 gap-8 lg:grid-cols-[1.2fr_1fr]">
-          <section className="relative overflow-hidden rounded-3xl border border-emerald-300/20 bg-gradient-to-b from-emerald-900/60 via-emerald-950 to-emerald-950 p-6 shadow-2xl">
-            <div className="relative mx-auto aspect-[3/4] max-h-[640px] w-full max-w-[520px]">
-              <div
-                className="absolute inset-0 rounded-b-[28px] shadow-[0_30px_80px_-10px_rgba(0,0,0,0.55)]"
-                style={{
-                  background:
-                    "linear-gradient(160deg, #14532d 0%, #0f172a 55%, #0b5d33 100%)",
-                  clipPath: "polygon(50% 0%, 92% 78%, 70% 78%, 90% 100%, 50% 88%, 10% 100%, 30% 78%, 8% 78%)",
-                  border: "2px solid rgba(226, 232, 240, 0.12)",
-                }}
-              />
-              <div
-                className="absolute left-1/2 top-[78%] h-16 w-12 -translate-x-1/2 rounded-md bg-amber-900/80 shadow-lg"
-              />
-              <div className="absolute inset-0">
-                {kudos.slice(0, 50).map((item) => (
-                  <Ornament
-                    key={item.id}
-                    kudos={item}
-                    twinkle={snowOn}
-                    onSelect={setSelectedKudos}
-                  />
-                ))}
-              </div>
-            </div>
-            <div className="mt-4 rounded-2xl border border-emerald-200/20 bg-slate-900/70 p-4 shadow-lg md:hidden">
-              {selectedKudos ? (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl">{selectedKudos.emoji}</span>
-                    <p className="text-base font-semibold text-white">
-                      To {selectedKudos.to_name}
-                    </p>
-                  </div>
-                  <p className="text-sm leading-relaxed text-emerald-50/90">
-                    {selectedKudos.message}
-                  </p>
-                  <p className="text-xs text-emerald-200/80">
-                    From {selectedKudos.author || "Anonymous"}
-                  </p>
-                </div>
-              ) : (
-                <p className="text-sm text-emerald-100/80">
-                  Tap an ornament on the tree to see its message.
-                </p>
-              )}
-            </div>
-          </section>
+          <ChristmasTree
+            kudos={kudos}
+            isSnowOn={snowOn}
+            setIsSnowOn={setSnowOn}
+            isSantaOn={santaOn}
+            setIsSantaOn={setSantaOn}
+            selectedKudos={selectedKudos}
+            onSelect={setSelectedKudos}
+          />
 
           <section className="flex flex-col gap-5">
             <form
@@ -413,41 +343,6 @@ export default function Home() {
             </div>
           </section>
         </main>
-      </div>
-    </div>
-  );
-}
-
-type OrnamentProps = {
-  kudos: Kudos;
-  twinkle: boolean;
-  onSelect?: (kudos: Kudos) => void;
-};
-
-function Ornament({ kudos, twinkle, onSelect }: OrnamentProps) {
-  const left = clamp(kudos.x, 0, 1) * 100;
-  const top = clamp(kudos.y, 0, 1) * 100;
-
-  return (
-    <div
-      className="group absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer"
-      onClick={() => onSelect?.(kudos)}
-      style={{ left: `${left}%`, top: `${top}%` }}
-    >
-      <div
-        className={`flex h-12 w-12 items-center justify-center rounded-full border border-white/40 text-2xl shadow-lg transition hover:scale-110 ${
-          twinkle ? "ornament-twinkle" : ""
-        }`}
-        style={{ backgroundColor: kudos.color }}
-      >
-        {kudos.emoji}
-      </div>
-      <div className="pointer-events-none absolute left-1/2 top-full z-10 mt-3 hidden w-56 -translate-x-1/2 rounded-xl border border-emerald-200/40 bg-slate-950/95 px-3 py-2 text-sm leading-snug text-emerald-50 shadow-xl backdrop-blur group-hover:block">
-        <p className="font-semibold text-white">To {kudos.to_name}</p>
-        <p className="text-emerald-100/90">{kudos.message}</p>
-        <p className="mt-1 text-xs text-emerald-200/80">
-          From {kudos.author || "Anonymous"}
-        </p>
       </div>
     </div>
   );
