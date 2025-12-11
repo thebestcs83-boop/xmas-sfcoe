@@ -106,7 +106,7 @@ export function ChristmasTree({
             border: "2px solid rgba(226, 232, 240, 0.12)",
           }}
         />
-        <div className="pointer-events-none absolute left-1/2 top-[6%] z-30 -translate-x-1/2">
+        <div className="pointer-events-none absolute left-1/2 top-[-5%] z-30 -translate-x-1/2">
           <div className="tree-star" />
         </div>
         <div
@@ -229,7 +229,7 @@ function Toggle({ checked, label, onCheckedChange }: ToggleProps) {
 function Snowman() {
   return (
     <div
-      className="pointer-events-none absolute left-0 bottom-20 z-20 scale-70 sm:left-[10%] sm:bottom-5 sm:scale-80 md:left-[11%] lg:left-[13%]"
+      className="pointer-events-none absolute left-0 bottom-30 z-20 scale-70 sm:left-[10%] sm:bottom-5 sm:scale-80 md:left-[11%] lg:left-[13%]"
       aria-hidden="true"
     >
       <div className="snowman">
