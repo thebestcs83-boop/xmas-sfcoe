@@ -241,8 +241,8 @@ export default function Home() {
         snowSpeedMultiplier={snowSpeedMultiplier}
         santaLoopTrigger={santaLoopTrigger}
       />
-      <div className="mx-auto flex max-w-5xl flex-col gap-8 px-5 py-10 lg:flex-row lg:py-14">
-        <header className="flex w-full flex-col gap-4 sm:flex-row sm:items-center">
+      <div className="mx-auto flex max-w-6xl flex-col gap-10 px-5 py-10 lg:flex-row lg:py-14">
+        <header className="flex w-full flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-2 w-full sm:max-w-md lg:max-w-lg">
             <p className={`text-sm uppercase tracking-[0.2em] ${headingAccent}`}>
               XMAS KUDOS Tree
@@ -252,8 +252,8 @@ export default function Home() {
               Share gratitude as glowing ornaments
             </h1>
           </div>
-          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-1 sm:flex-row sm:items-center sm:justify-end sm:gap-3">
-            <label className="flex w-full items-center gap-2 sm:max-w-xs">
+          <div className="flex w-full flex-wrap items-center gap-3 sm:w-auto sm:flex-1 sm:justify-end">
+            <label className="flex min-w-[240px] flex-1 items-center gap-2 sm:max-w-xs">
               <span className={`text-xs font-semibold ${mutedText}`}>Filter</span>
               <input
                 value={filterText}
@@ -278,7 +278,7 @@ export default function Home() {
           </div>
         </header>
 
-        <main className="grid w-full grid-cols-1 gap-8 lg:grid-cols-[1.2fr_1fr]">
+        <main className="grid w-full grid-cols-1 items-start gap-8 lg:grid-cols-[1.2fr_1fr] lg:gap-10">
           <ChristmasTree
             kudos={filteredKudos}
             isSnowOn={snowOn}
@@ -290,7 +290,7 @@ export default function Home() {
             onTreeActivate={triggerTreeActivate}
           />
 
-          <section className="flex flex-col gap-5">
+          <section className="flex flex-col gap-5 lg:gap-6">
             <form
               onSubmit={handleSubmit}
               className={formPanelClass}
@@ -456,11 +456,6 @@ export default function Home() {
                             </p>
                           </div>
                         </div>
-                        <span
-                          className={`text-xs ${isDark ? "text-emerald-100/70" : "text-emerald-700/70"}`}
-                        >
-                          {formatRelativeTime(item.created_at)}
-                        </span>
                       </div>
                       <p
                         className={`mt-2 text-sm leading-relaxed ${

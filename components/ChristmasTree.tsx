@@ -94,6 +94,7 @@ export function ChristmasTree({
         <div
           className="absolute left-1/2 top-[78%] h-16 w-12 -translate-x-1/2 rounded-md bg-amber-900/80 shadow-lg"
         />
+        <GiftsRow />
         <div className="absolute inset-0">
           {kudos.slice(0, 50).map((item) => (
             <Ornament
@@ -210,7 +211,7 @@ function Toggle({ checked, label, onCheckedChange }: ToggleProps) {
 function Snowman() {
   return (
     <div
-      className="pointer-events-none absolute left-2 top-1/2 z-10 hidden -translate-y-1/2 md:block lg:left-6"
+      className="pointer-events-none absolute left-3 bottom-12 z-20 scale-90 sm:left-[10%] sm:bottom-10 sm:scale-100 md:left-[11%] lg:left-[13%]"
       aria-hidden="true"
     >
       <div className="snowman">
@@ -223,6 +224,32 @@ function Snowman() {
         <div className="snowman-arm snowman-arm-left" />
         <div className="snowman-arm snowman-arm-right" />
       </div>
+    </div>
+  );
+}
+
+function GiftsRow() {
+  const gifts = [
+    { color: "bg-gradient-to-br from-amber-300 to-amber-500", accent: "bg-emerald-700" },
+    { color: "bg-gradient-to-br from-sky-300 to-sky-500", accent: "bg-pink-500" },
+    { color: "bg-gradient-to-br from-rose-300 to-rose-500", accent: "bg-amber-700" },
+    { color: "bg-gradient-to-br from-violet-300 to-indigo-500", accent: "bg-lime-400" },
+  ];
+
+  return (
+    <div className="pointer-events-none absolute bottom-2 left-1/2 z-20 flex -translate-x-1/2 items-end gap-2 sm:gap-3">
+      {gifts.map((gift, idx) => (
+        <div
+          // eslint-disable-next-line react/no-array-index-key
+          key={idx}
+          className={`relative h-10 w-10 rounded-sm shadow-lg shadow-black/40 ${gift.color}`}
+          style={{ transform: `translateY(${idx % 2 === 0 ? "0px" : "4px"})` }}
+        >
+          <div className={`absolute left-1/2 top-0 h-full w-1.5 -translate-x-1/2 ${gift.accent}`} />
+          <div className={`absolute inset-x-0 top-2 h-1.5 ${gift.accent}`} />
+          <div className="absolute -top-2 left-1/2 h-3 w-2 -translate-x-1/2 rounded-sm bg-white/90" />
+        </div>
+      ))}
     </div>
   );
 }
