@@ -1,25 +1,71 @@
 // components/SurpriseEffects.tsx
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+
+function usePrefersReducedMotion() {
+  const [prefersReduced, setPrefersReduced] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const updatePreference = () => setPrefersReduced(mediaQuery.matches);
+
+    updatePreference();
+
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener("change", updatePreference);
+    } else {
+      // Older Safari
+      // eslint-disable-next-line deprecation/deprecation
+      mediaQuery.addListener(updatePreference);
+    }
+
+    return () => {
+      if (mediaQuery.removeEventListener) {
+        mediaQuery.removeEventListener("change", updatePreference);
+      } else {
+        // eslint-disable-next-line deprecation/deprecation
+        mediaQuery.removeListener(updatePreference);
+      }
+    };
+  }, []);
+
+  return prefersReduced;
+}
+
+type SurpriseEffectsProps = {
+  snowOn: boolean;
+  santaOn: boolean;
+  snowSpeedMultiplier?: number;
+  santaLoopTrigger?: number;
+};
 
 /**
  * Render any combination of snow and Santa overlays.
  */
-export function SurpriseEffects({ snowOn, santaOn }: { snowOn: boolean; santaOn: boolean }) {
-  if (!snowOn && !santaOn) return null;
+export function SurpriseEffects({
+  snowOn,
+  santaOn,
+  snowSpeedMultiplier = 1,
+  santaLoopTrigger = 0,
+}: SurpriseEffectsProps) {
+  const prefersReducedMotion = usePrefersReducedMotion();
+
+  if (prefersReducedMotion || (!snowOn && !santaOn)) return null;
 
   return (
     <>
-      {snowOn && <SnowEffect />}
-      {santaOn && <SantaFlightEffect />}
+      {snowOn && <SnowEffect speedMultiplier={snowSpeedMultiplier} />}
+      {santaOn && <SantaFlightEffect loopTrigger={santaLoopTrigger} />}
     </>
   );
 }
 
 /* ------------------ Surprise Mode 1: Snow ------------------ */
 
-function SnowEffect() {
+function SnowEffect({ speedMultiplier }: { speedMultiplier: number }) {
   // This is a simple, light snow overlay. If you already have a snow
   // implementation, you can replace this with your existing JSX.
   const flakes = useMemo(
@@ -47,8 +93,8 @@ function SnowEffect() {
             width: `${flake.size}px`,
             height: `${flake.size}px`,
             opacity: flake.opacity,
-            animationDelay: `${flake.delay}s`,
-            animationDuration: `${flake.duration}s`,
+            animationDelay: `${flake.delay * speedMultiplier}s`,
+            animationDuration: `${flake.duration * speedMultiplier}s`,
           }}
         />
       ))}
@@ -58,100 +104,74 @@ function SnowEffect() {
 
 /* ------------------ Surprise Mode 2: Santa + reindeers ------------------ */
 
-function SantaFlightEffect() {
-    // Santa + reindeers flight state in percentage of viewport
-    const [state, setState] = React.useState(() => {
-      const angle = Math.random() * Math.PI * 2; // random 0..360°
-      const vx = Math.cos(angle);
-      const vy = Math.sin(angle);
-      return {
-        x: 50,   // start roughly center
-        y: 25,   // top-half (0..50)
-        vx,
-        vy,
-      };
-    });
+function SantaFlightEffect({ loopTrigger }: { loopTrigger: number }) {
+    const [isLooping, setIsLooping] = useState(false);
+  
+    useEffect(() => {
+      if (!loopTrigger) return;
+      setIsLooping(true);
+      const t = window.setTimeout(() => setIsLooping(false), 1000);
+      return () => window.clearTimeout(t);
+    }, [loopTrigger]);
+  
+    // circular flight around tree center
+    const [angleState, setAngleState] = React.useState(() => ({
+      angle: Math.random() * Math.PI * 2,
+    }));
   
     const rafRef = React.useRef<number | null>(null);
   
     React.useEffect(() => {
       let last = performance.now();
-  
       const tick = (now: number) => {
-        const dt = (now - last) / 1000; // seconds
+        const dt = (now - last) / 1000;
         last = now;
-  
-        setState(prev => {
-          let { x, y, vx, vy } = prev;
-  
-          const SPEED = 18; // % of screen per second
-          const TOP = 5;    // keep santa in 5–45% vertical band
-          const BOTTOM = 45;
-          const LEFT = 0;
-          const RIGHT = 100;
-  
-          // move
-          x += vx * SPEED * dt;
-          y += vy * SPEED * dt;
-  
-          // bounce logic – reflect velocity when touching edges
-          if (x <= LEFT) {
-            x = LEFT;
-            vx = Math.abs(vx); // go right
-          } else if (x >= RIGHT) {
-            x = RIGHT;
-            vx = -Math.abs(vx); // go left
-          }
-  
-          if (y <= TOP) {
-            y = TOP;
-            vy = Math.abs(vy); // go down
-          } else if (y >= BOTTOM) {
-            y = BOTTOM;
-            vy = -Math.abs(vy); // go up
-          }
-  
-          return { x, y, vx, vy };
-        });
-  
+        setAngleState((prev) => ({
+          angle: (prev.angle + dt * 0.65 * Math.PI) % (Math.PI * 2),
+        }));
         rafRef.current = requestAnimationFrame(tick);
       };
-  
       rafRef.current = requestAnimationFrame(tick);
       return () => {
         if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
       };
     }, []);
   
-    const { x, y, vx, vy } = state;
+    const angle = angleState.angle;
+    const centerX = 50;
+    const centerY = 44;
+    const radiusX = 32;
+    const radiusY = 20;
   
-    // direction vector + angle for rotation
+    const santaX = centerX + Math.cos(angle) * radiusX;
+    const santaY = centerY + Math.sin(angle) * radiusY;
+  
+    // tangential direction for orientation/trailing
+    const vx = -Math.sin(angle) * radiusX;
+    const vy = Math.cos(angle) * radiusY;
     const len = Math.hypot(vx, vy) || 1;
     const ux = vx / len;
     const uy = vy / len;
     const angleDeg = (Math.atan2(uy, ux) * 180) / Math.PI;
   
-    // Santa is the lead; reindeers trail behind along the opposite direction
-    const spacing = 6; // distance between emojis in % of screen
-    const santaPos = { x, y };
-    const deerOffsets = [1, 2, 3, 4]; // number of reindeers
+    const spacing = 6;
+    const deerOffsets = [1, 2, 3, 4];
   
-    const deerPositions = deerOffsets.map(i => ({
-      x: x - ux * spacing * i,
-      y: y - uy * spacing * i,
+    const deerPositions = deerOffsets.map((i) => ({
+      x: santaX - ux * spacing * i,
+      y: santaY - uy * spacing * i,
     }));
   
     return (
       <div className="pointer-events-none fixed inset-0 z-40 overflow-visible">
-        {/* Santa (lead) */}
         <FlyingEmoji
           emoji="🎅"
-          x={santaPos.x}
-          y={santaPos.y}
+          x={santaX}
+          y={santaY}
           angleDeg={angleDeg}
           sizeClass="text-4xl"
+          looping={isLooping}
         />
-        {/* Reindeers trailing behind */}
         {deerPositions.map((pos, idx) => (
           <FlyingEmoji
             key={idx}
@@ -160,15 +180,16 @@ function SantaFlightEffect() {
             y={pos.y}
             angleDeg={angleDeg}
             sizeClass="text-3xl"
+            looping={isLooping}
           />
         ))}
-        {/* gift trailing at the end */}
         <FlyingEmoji
           emoji="🎁"
-          x={x - ux * spacing * (deerOffsets.length + 1)}
-          y={y - uy * spacing * (deerOffsets.length + 1)}
+          x={santaX - ux * spacing * (deerOffsets.length + 1)}
+          y={santaY - uy * spacing * (deerOffsets.length + 1)}
           angleDeg={angleDeg}
           sizeClass="text-2xl"
+          looping={isLooping}
         />
       </div>
     );
@@ -180,12 +201,13 @@ function SantaFlightEffect() {
     y: number;        // 0–100 (% of viewport height)
     angleDeg: number; // direction of travel
     sizeClass?: string;
+    looping?: boolean;
   };
   
-  function FlyingEmoji({ emoji, x, y, angleDeg, sizeClass }: FlyingEmojiProps) {
+  function FlyingEmoji({ emoji, x, y, angleDeg, sizeClass, looping }: FlyingEmojiProps) {
     return (
       <div
-        className={`absolute drop-shadow-[0_0_10px_rgba(0,0,0,0.8)] ${sizeClass ?? "text-3xl"}`}
+        className={`absolute drop-shadow-[0_0_10px_rgba(0,0,0,0.8)] ${sizeClass ?? "text-3xl"} ${looping ? "santa-loop" : ""}`}
         style={{
           left: `${x}%`,
           top: `${y}%`,

@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChristmasTree } from "@/components/ChristmasTree";
 import { SurpriseEffects } from "@/components/SurpriseEffects";
+import { QrInvite } from "@/components/QrInvite";
 import { supabase } from "@/lib/supabaseClient";
 
 type Kudos = {
@@ -65,6 +66,10 @@ export default function Home() {
   const [emoji, setEmoji] = useState(emojiOptions[0]);
   const [color, setColor] = useState<string>("");
   const [submitting, setSubmitting] = useState(false);
+  const [snowSpeedMultiplier, setSnowSpeedMultiplier] = useState(1);
+  const [santaLoopTrigger, setSantaLoopTrigger] = useState(0);
+  const snowBoostTimeout = useRef<number | null>(null);
+  const [filterText, setFilterText] = useState("");
 
   useEffect(() => {
     const fetchKudos = async () => {
@@ -128,6 +133,14 @@ export default function Home() {
     root.classList.add(isDark ? "theme-dark" : "theme-light");
     localStorage.setItem("theme", theme);
   }, [isDark, theme]);
+
+  useEffect(() => {
+    return () => {
+      if (snowBoostTimeout.current) {
+        window.clearTimeout(snowBoostTimeout.current);
+      }
+    };
+  }, []);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -202,15 +215,35 @@ export default function Home() {
     : `${inputBase} border-emerald-700/20 bg-white text-emerald-950 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/30`;
 
   const toggleButtonClass = isDark
-    ? "flex items-center gap-2 rounded-full border border-emerald-200/40 bg-white/5 px-3 py-2 text-sm text-emerald-50 transition hover:border-emerald-200/70"
-    : "flex items-center gap-2 rounded-full border border-emerald-700/30 bg-white px-3 py-2 text-sm text-emerald-800 shadow-sm transition hover:border-emerald-700/60";
+    ? "flex items-center gap-2 rounded-full border border-emerald-200/40 bg-white/5 px-3 py-2 text-sm text-emerald-50 transition hover:border-emerald-200/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-200"
+    : "flex items-center gap-2 rounded-full border border-emerald-700/30 bg-white px-3 py-2 text-sm text-emerald-800 shadow-sm transition hover:border-emerald-700/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500";
+
+  const triggerTreeActivate = () => {
+    setSnowSpeedMultiplier(0.5);
+    setSantaLoopTrigger((c) => c + 1);
+    if (snowBoostTimeout.current) {
+      window.clearTimeout(snowBoostTimeout.current);
+    }
+    snowBoostTimeout.current = window.setTimeout(() => setSnowSpeedMultiplier(1), 1000);
+  };
+
+  const filteredKudos = filterText
+    ? kudos.filter((k) =>
+        k.to_name.toLowerCase().includes(filterText.trim().toLowerCase()),
+      )
+    : kudos;
 
   return (
-    <div className={containerClass}>
-      <SurpriseEffects snowOn={snowOn} santaOn={santaOn} />
+    <div id="main-content" className={containerClass}>
+      <SurpriseEffects
+        snowOn={snowOn}
+        santaOn={santaOn}
+        snowSpeedMultiplier={snowSpeedMultiplier}
+        santaLoopTrigger={santaLoopTrigger}
+      />
       <div className="mx-auto flex max-w-5xl flex-col gap-8 px-5 py-10 lg:flex-row lg:py-14">
-        <header className="flex w-full items-center justify-start gap-4">
-          <div className="space-y-2 w-full md:max-w-md lg:max-w-lg">
+        <header className="flex w-full flex-col gap-4 sm:flex-row sm:items-center">
+          <div className="space-y-2 w-full sm:max-w-md lg:max-w-lg">
             <p className={`text-sm uppercase tracking-[0.2em] ${headingAccent}`}>
               XMAS KUDOS Tree
             </p>
@@ -219,17 +252,42 @@ export default function Home() {
               Share gratitude as glowing ornaments
             </h1>
           </div>
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-1 sm:flex-row sm:items-center sm:justify-end sm:gap-3">
+            <label className="flex w-full items-center gap-2 sm:max-w-xs">
+              <span className={`text-xs font-semibold ${mutedText}`}>Filter</span>
+              <input
+                value={filterText}
+                onChange={(e) => setFilterText(e.target.value)}
+                className={`${inputClass} h-9 text-sm`}
+                placeholder="Filter by recipient"
+                aria-label="Filter ornaments by recipient"
+              />
+            </label>
+            <button
+              type="button"
+              onClick={() => setTheme(isDark ? "light" : "dark")}
+              className={toggleButtonClass}
+              aria-pressed={isDark}
+              aria-label="Toggle light and dark mode"
+            >
+              <span className="text-lg">{isDark ? "🌙" : "☀️"}</span>
+              <span className="text-xs font-semibold uppercase tracking-wide">
+                {isDark ? "Dark" : "Light"}
+              </span>
+            </button>
+          </div>
         </header>
 
         <main className="grid w-full grid-cols-1 gap-8 lg:grid-cols-[1.2fr_1fr]">
           <ChristmasTree
-            kudos={kudos}
+            kudos={filteredKudos}
             isSnowOn={snowOn}
             setIsSnowOn={setSnowOn}
             isSantaOn={santaOn}
             setIsSantaOn={setSantaOn}
             selectedKudos={selectedKudos}
             onSelect={setSelectedKudos}
+            onTreeActivate={triggerTreeActivate}
           />
 
           <section className="flex flex-col gap-5">
@@ -293,7 +351,8 @@ export default function Home() {
                         key={option}
                         type="button"
                         onClick={() => setEmoji(option)}
-                        className={`flex h-10 items-center justify-center rounded-xl border transition ${
+                        aria-pressed={emoji === option}
+                        className={`flex h-10 items-center justify-center rounded-xl border transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-300 ${
                           emoji === option
                             ? isDark
                               ? "border-white bg-white/20"
@@ -317,7 +376,8 @@ export default function Home() {
                         key={c}
                         type="button"
                         onClick={() => setColor(c)}
-                        className={`h-10 w-10 rounded-full border-2 transition hover:scale-105 ${
+                        aria-pressed={color === c}
+                        className={`h-10 w-10 rounded-full border-2 transition hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-300 ${
                           color === c
                             ? isDark
                               ? "border-white ring-2 ring-white/60"
@@ -333,7 +393,8 @@ export default function Home() {
                     <button
                       type="button"
                       onClick={() => setColor("")}
-                      className={`flex h-10 items-center justify-center rounded-full border border-dashed px-3 text-xs uppercase tracking-wider ${
+                      aria-pressed={color === ""}
+                      className={`flex h-10 items-center justify-center rounded-full border border-dashed px-3 text-xs uppercase tracking-wider focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-300 ${
                         color === ""
                           ? isDark
                             ? "border-white text-white"
@@ -378,7 +439,7 @@ export default function Home() {
                 <p className={`text-sm ${mutedText}`}>Loading kudos…</p>
               ) : (
                 <div className="flex max-h-[460px] flex-col gap-3 overflow-y-auto pr-1">
-                  {kudos.slice(0, 30).map((item) => (
+                  {filteredKudos.slice(0, 30).map((item) => (
                     <article
                       key={item.id}
                       className={cardClass}
@@ -418,6 +479,8 @@ export default function Home() {
                 </div>
               )}
             </div>
+
+            <QrInvite />
           </section>
         </main>
       </div>
