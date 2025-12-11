@@ -234,63 +234,65 @@ export default function Home() {
     : kudos;
 
   return (
-    <div id="main-content" className={containerClass}>
+    <main id="main-content" className={containerClass}>
       <SurpriseEffects
         snowOn={snowOn}
         santaOn={santaOn}
         snowSpeedMultiplier={snowSpeedMultiplier}
         santaLoopTrigger={santaLoopTrigger}
       />
-      <div className="mx-auto flex max-w-6xl flex-col gap-10 px-5 py-10 lg:flex-row lg:py-14">
-        <header className="flex w-full flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="space-y-2 w-full sm:max-w-md lg:max-w-lg">
-            <p className={`text-sm uppercase tracking-[0.2em] ${headingAccent}`}>
-              XMAS KUDOS Tree
-            </p>
-            <p className={`text-xs ${mutedText}`}>By the SF CoE Consulting Team</p>
-            <h1 className={`text-2xl font-semibold leading-tight ${subHeading} md:text-3xl`}>
-              Share gratitude as glowing ornaments
-            </h1>
-          </div>
-          <div className="flex w-full flex-wrap items-center gap-3 sm:w-auto sm:flex-1 sm:justify-end">
-            <label className="flex min-w-[240px] flex-1 items-center gap-2 sm:max-w-xs">
-              <span className={`text-xs font-semibold ${mutedText}`}>Filter</span>
-              <input
-                value={filterText}
-                onChange={(e) => setFilterText(e.target.value)}
-                className={`${inputClass} h-9 text-sm`}
-                placeholder="Filter by recipient"
-                aria-label="Filter ornaments by recipient"
-              />
-            </label>
-            <button
-              type="button"
-              onClick={() => setTheme(isDark ? "light" : "dark")}
-              className={toggleButtonClass}
-              aria-pressed={isDark}
-              aria-label="Toggle light and dark mode"
-            >
-              <span className="text-lg">{isDark ? "🌙" : "☀️"}</span>
-              <span className="text-xs font-semibold uppercase tracking-wide">
-                {isDark ? "Dark" : "Light"}
-              </span>
-            </button>
-          </div>
-        </header>
+      <div className="mx-auto w-full max-w-[1024px] px-4 py-8">
+        <div className="flex flex-col gap-8 lg:flex-row">
+          <div className="flex w-full flex-col gap-6">
+            <header className="flex w-full flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="space-y-2 w-full sm:max-w-md lg:max-w-lg">
+                <p className={`text-sm uppercase tracking-[0.2em] ${headingAccent}`}>
+                  XMAS KUDOS Tree
+                </p>
+                <p className={`text-xs ${mutedText}`}>By the SF CoE Consulting Team</p>
+                <h1 className={`text-2xl font-semibold leading-tight ${subHeading} md:text-3xl`}>
+                  Share gratitude as glowing ornaments
+                </h1>
+              </div>
+              <div className="flex w-full flex-wrap items-center gap-3 sm:w-auto sm:flex-1 sm:justify-end">
+                <label className="flex min-w-[240px] flex-1 items-center gap-2 sm:max-w-xs">
+                  <span className={`text-xs font-semibold ${mutedText}`}>Filter</span>
+                  <input
+                    value={filterText}
+                    onChange={(e) => setFilterText(e.target.value)}
+                    className={`${inputClass} h-9 text-sm`}
+                    placeholder="Filter by recipient"
+                    aria-label="Filter ornaments by recipient"
+                  />
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setTheme(isDark ? "light" : "dark")}
+                  className={toggleButtonClass}
+                  aria-pressed={isDark}
+                  aria-label="Toggle light and dark mode"
+                >
+                  <span className="text-lg">{isDark ? "🌙" : "☀️"}</span>
+                  <span className="text-xs font-semibold uppercase tracking-wide">
+                    {isDark ? "Dark" : "Light"}
+                  </span>
+                </button>
+              </div>
+            </header>
 
-        <main className="grid w-full grid-cols-1 items-start gap-8 lg:grid-cols-[1.2fr_1fr] lg:gap-10">
-          <ChristmasTree
-            kudos={filteredKudos}
-            isSnowOn={snowOn}
-            setIsSnowOn={setSnowOn}
-            isSantaOn={santaOn}
-            setIsSantaOn={setSantaOn}
-            selectedKudos={selectedKudos}
-            onSelect={setSelectedKudos}
-            onTreeActivate={triggerTreeActivate}
-          />
+            <ChristmasTree
+              kudos={filteredKudos}
+              isSnowOn={snowOn}
+              setIsSnowOn={setSnowOn}
+              isSantaOn={santaOn}
+              setIsSantaOn={setSantaOn}
+              selectedKudos={selectedKudos}
+              onSelect={setSelectedKudos}
+              onTreeActivate={triggerTreeActivate}
+            />
+          </div>
 
-          <section className="flex flex-col gap-5 lg:gap-6">
+          <section className="flex w-full flex-col gap-5 lg:max-w-[420px] lg:gap-6">
             <form
               onSubmit={handleSubmit}
               className={formPanelClass}
@@ -477,8 +479,8 @@ export default function Home() {
 
             <QrInvite />
           </section>
-        </main>
+        </div>
       </div>
-    </div>
+    </main>
   );
 }

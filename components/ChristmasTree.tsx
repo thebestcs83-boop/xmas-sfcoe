@@ -63,6 +63,24 @@ export function ChristmasTree({
   return (
     <section className="relative overflow-hidden rounded-3xl border border-emerald-300/20 bg-gradient-to-b from-emerald-900/60 via-emerald-950 to-emerald-950 p-6 shadow-2xl">
       <Snowman />
+      {selectedKudos && (
+        <div className="pointer-events-auto absolute right-3 top-3 z-30 hidden w-64 rounded-2xl border border-emerald-200/30 bg-slate-900/85 p-4 text-left text-sm text-emerald-50 shadow-2xl backdrop-blur md:block lg:right-6 lg:top-4">
+          <div className="flex items-center gap-3">
+            <span className="text-3xl">{selectedKudos.emoji}</span>
+            <div className="space-y-1">
+              <p className="text-base font-semibold text-white">
+                To {selectedKudos.to_name}
+              </p>
+              <p className="text-xs text-emerald-100/80">
+                From {selectedKudos.author || "Anonymous"}
+              </p>
+            </div>
+          </div>
+          <p className="mt-3 text-sm leading-relaxed text-emerald-50/90">
+            {selectedKudos.message}
+          </p>
+        </div>
+      )}
       <div className="absolute left-4 top-3 z-20 flex flex-col items-start gap-2 text-xs text-slate-100 md:text-sm">
         <div className="flex items-center gap-1">
           <span>Snow</span>
@@ -162,13 +180,13 @@ function Ornament({ kudos, twinkle, wiggle, onSelect }: OrnamentProps) {
     >
       <div className="relative flex flex-col items-center">
         <div
-          className={`flex h-12 w-12 items-center justify-center rounded-full border border-white/40 text-2xl shadow-lg transition hover:scale-110 ${twinkle ? "ornament-twinkle" : ""} ${wiggle ? "ornament-wiggle" : ""}`}
+          className={`flex h-6 w-6 items-center justify-center rounded-full border border-white/40 text-base shadow-lg transition hover:scale-110 ${twinkle ? "ornament-twinkle" : ""} ${wiggle ? "ornament-wiggle" : ""}`}
           style={{ backgroundColor: kudos.color }}
         >
           {kudos.emoji}
         </div>
         <span
-          className="pointer-events-none mt-1 max-w-[80px] truncate rounded-full bg-emerald-900/80 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-50 shadow-sm backdrop-blur"
+          className="pointer-events-none mt-1 max-w-[72px] truncate rounded-full bg-emerald-900/80 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-emerald-50 shadow-sm backdrop-blur"
           aria-hidden="true"
         >
           {kudos.to_name}
@@ -211,7 +229,7 @@ function Toggle({ checked, label, onCheckedChange }: ToggleProps) {
 function Snowman() {
   return (
     <div
-      className="pointer-events-none absolute left-3 bottom-12 z-20 scale-90 sm:left-[10%] sm:bottom-10 sm:scale-100 md:left-[11%] lg:left-[13%]"
+      className="pointer-events-none absolute left-0 bottom-20 z-20 scale-70 sm:left-[10%] sm:bottom-5 sm:scale-80 md:left-[11%] lg:left-[13%]"
       aria-hidden="true"
     >
       <div className="snowman">
