@@ -311,37 +311,50 @@ export default function Home() {
                 )}
               </div>
 
-              <div className="grid grid-cols-1 gap-4">
-                <label className={`space-y-1 text-sm ${labelText}`}>
-                  From (optional)
-                  <input
-                    className={inputClass}
-                    value={author}
-                    onChange={(e) => setAuthor(e.target.value)}
-                    placeholder="Your name"
-                  />
-                </label>
-                <label className={`space-y-1 text-sm ${labelText}`}>
-                  To *
-                  <input
-                    required
-                    className={inputClass}
-                    value={toName}
-                    onChange={(e) => setToName(e.target.value)}
-                    placeholder="Who is this for?"
-                  />
-                </label>
-                <label className={`space-y-1 text-sm ${labelText}`}>
-                  Message *
-                  <textarea
-                    required
-                    maxLength={200}
-                    className={`${inputClass} min-h-[96px]`}
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Say something kind (max 200 chars)"
-                  />
-                </label>
+              <div className="relative">
+                <div className="absolute left-1/2 top-0 z-10 w-full -translate-x-1/2">
+                  <div className="mx-auto max-w-sm rounded-2xl border border-emerald-200/20 bg-slate-950/55 px-4 py-4 text-center text-sm font-semibold text-emerald-50 shadow-lg backdrop-blur">
+                    <p>Thank you for particupating. The Kudos Tree is now closed.</p>
+                    <p className="mt-1 text-emerald-100/80">Merry Christmas!</p>
+                  </div>
+                </div>
+                <div className="pointer-events-none opacity-50">
+                  <div className="grid grid-cols-1 gap-4">
+                    <label className={`space-y-1 text-sm ${labelText}`}>
+                      From (optional)
+                      <input
+                        className={inputClass}
+                        value={author}
+                        onChange={(e) => setAuthor(e.target.value)}
+                        placeholder="Your name"
+                        disabled
+                      />
+                    </label>
+                    <label className={`space-y-1 text-sm ${labelText}`}>
+                      To *
+                      <input
+                        required
+                        className={inputClass}
+                        value={toName}
+                        onChange={(e) => setToName(e.target.value)}
+                        placeholder="Who is this for?"
+                        disabled
+                      />
+                    </label>
+                    <label className={`space-y-1 text-sm ${labelText}`}>
+                      Message *
+                      <textarea
+                        required
+                        maxLength={200}
+                        className={`${inputClass} min-h-[96px]`}
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
+                        placeholder="Say something kind (max 200 chars)"
+                        disabled
+                      />
+                    </label>
+                  </div>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -423,10 +436,10 @@ export default function Home() {
 
               <button
                 type="submit"
-                disabled={submitting}
-                className="w-full rounded-xl bg-gradient-to-r from-emerald-400 to-emerald-300 px-4 py-3 text-center text-base font-semibold text-emerald-950 shadow-lg transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-70"
+                disabled
+                className="w-full rounded-xl bg-gradient-to-r from-emerald-400 to-emerald-300 px-4 py-3 text-center text-base font-semibold text-emerald-950 opacity-70 shadow-lg transition disabled:cursor-not-allowed"
               >
-                {submitting ? "Sending..." : "Send Kudos"}
+                Closed
               </button>
             </form>
 
